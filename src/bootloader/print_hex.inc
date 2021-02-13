@@ -7,32 +7,31 @@
 print_hex:
     push bp
     mov bp, sp
-    push bx
+    push di
 
-    mov ax, word [bp+4]         ; move hex value to print to ax
-    mov bx, .hex_string + 2
+    mov dx, word [bp+4]         ; move hex value to print to ax
+    mov di, .hex_string + 2
     mov cx, 4
 
 .loop:
-    mov dh, ah
-    shr dh, 4                   ; isolate four most significant bits
+    mov al, dh
+    shr al, 4                   ; isolate four most significant bits
 
-    cmp dh, 0x09                ; handle 0-9 and a-f separately
+    cmp al, 0x09                ; handle 0-9 and a-f separately
     ja .gtea
     jmp .lte9
 
 .lte9:
-    add dh, '0'
+    add al, '0'
     jmp .add_to_string
 
 .gtea:
-    add dh, 'a'-0x0a
+    add al, 'a'-0x0a
     jmp .add_to_string
 
 .add_to_string:
-    mov byte [bx], dh
-    shl ax, 4                   ; handle 4 next most significant bits
-    inc bx
+    stosb
+    shl dx, 4                   ; handle 4 next most significant bits
 
     loop .loop
 
@@ -41,7 +40,7 @@ print_hex:
     call print_string
     add sp, 2                   ; 'pop' hex string address
 
-    pop bx
+    pop di
     pop bp
 
     ret

@@ -52,8 +52,8 @@ main:
 .error_message: db "Error loading disk", 0
 .drive_number: db 0
 
-%include "to_text_mode.inc"
-%include "print_string.inc"
+%include "bootloader/to_text_mode.inc"
+%include "bootloader/print_string.inc"
 %include "constants.inc"
 
     times 510-($-$$) db 0

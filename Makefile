@@ -1,16 +1,11 @@
-.PHONY: run default
+.PHONY: run binaries clean
 
-default: all.bin
+binaries:
+	$(MAKE) -C src
+	mv src/*.bin build
 
-%.asm: *.inc
-	touch $@
+run: binaries
+	qemu-system-i386 -drive format=raw,file=build/all.bin
 
-%.bin: %.asm
-	nasm -f bin $< -o $@
-
-all.bin: bootloader.bin kaarme.bin
-	cat bootloader.bin kaarme.bin > all.bin
-
-run: all.bin
-	qemu-system-i386 -drive format=raw,file=all.bin
-
+clean:
+	rm -f build/*

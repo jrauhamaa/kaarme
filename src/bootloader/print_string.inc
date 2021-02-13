@@ -7,21 +7,20 @@
 print_string:
     push bp
     mov bp, sp
-    push bx
-    mov bx, [bp+4]              ; store address of string in bx
+    push si
+    mov si, [bp+4]              ; store address of string in si
 
     mov ah, 0x0e                ; print char interrupt
 
 .print_char:
-    mov al, [bx]                ; character to print
+    lodsb
     cmp al, 0                   ; if character is NULL, return
     je .end
 
     int 0x10                    ; print character
-    inc bx                      ; next char
     jmp .print_char
 
 .end:
-    pop bx
+    pop si
     pop bp
     ret
