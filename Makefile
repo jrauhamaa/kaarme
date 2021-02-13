@@ -1,13 +1,16 @@
 .PHONY: run default
 
-default: bootloader.bin
+default: all.bin
 
-bootloader.asm: *.inc
-	touch bootloader.asm
+%.asm: *.inc
+	touch $@
 
-bootloader.bin: bootloader.asm
-	nasm -f bin bootloader.asm -o bootloader.bin
+%.bin: %.asm
+	nasm -f bin $< -o $@
 
-run: bootloader.bin
-	qemu-system-i386 -drive format=raw,file=bootloader.bin
+all.bin: bootloader.bin kaarme.bin
+	cat bootloader.bin kaarme.bin > all.bin
+
+run: all.bin
+	qemu-system-i386 -drive format=raw,file=all.bin
 

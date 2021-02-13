@@ -15,6 +15,9 @@ print_registers:
     push cx                     ; cx in now in [bp-4]
     push ax                     ; ax in now in [bp-6]
 
+    push .message
+    call print_string
+
     ;----------
     ;--- AX ---
     ;----------
@@ -139,6 +142,7 @@ print_registers:
     ret
 
 
+.message db "Registers:", 0
 .flags:  db 0x0a, 0x0d, "flags: ", 0
 .ax:     db 0x0a, 0x0d, "ax: ", 0
 .bx:     db 0x0a, 0x0d, "bx: ", 0
