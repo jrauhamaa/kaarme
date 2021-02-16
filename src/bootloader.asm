@@ -3,15 +3,8 @@ bits 16
 
 main:
     mov byte [.drive_number], dl ; boot drive number is stored in dl
-    mov bp, sp
 
     call to_text_mode
-
-    push .message
-    call print_string
-
-    push .load_message
-    call print_string
 
 .load_part2:
     mov ax, PART2_SEGMENT
@@ -47,14 +40,12 @@ main:
     jmp .end
 
 
-.message: db "This is part 1 of the bootloader.", 0x0a, 0x0d, 0
-.load_message: db "Loading part 2...", 0x0a, 0x0d, 0
 .error_message: db "Error loading disk", 0
 .drive_number: db 0
 
-%include "bootloader/to_text_mode.inc"
-%include "bootloader/print_string.inc"
-%include "constants.inc"
+%include "utils/interrupts.inc"
+%include "utils/constants.inc"
+%include "utils/print.inc"
 
     times 510-($-$$) db 0
     dw 0xaa55

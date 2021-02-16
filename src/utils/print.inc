@@ -1,16 +1,91 @@
 ;;;
-;;; print contents of all registers
-;;; no arguments
-;;; dependencies: print_string, print_hex
+;;; print_string - print a null-terminated string
+;;; 1 argument - the beginning address the string to print
 ;;;
 
+print_string:
+    push bp
+    mov bp, sp
+    push si
+    mov si, [bp+4]              ; store address of string in si
+
+    mov ah, 0x0e                ; print char interrupt
+
+.print_char:
+    lodsb
+    cmp al, 0                   ; if character is NULL, return
+    je .end
+
+    int 0x10                    ; print character
+    jmp .print_char
+
+.end:
+    pop si
+    pop bp
+    ret
+
+
+;;;
+;;; print_hex - print a word as a hexadecimal number
+;;; 1 argument: the hex value to print
+;;;
+
+print_hex:
+    push bp
+    mov bp, sp
+    push di
+
+    mov dx, word [bp+4]         ; move hex value to print to ax
+    mov di, .hex_string + 2
+    mov cx, 4
+
+.loop:
+    mov al, dh
+    shr al, 4                   ; isolate four most significant bits
+
+    cmp al, 0x09                ; handle 0-9 and a-f separately
+    ja .gtea
+    jmp .lte9
+
+.lte9:
+    add al, '0'
+    jmp .add_to_string
+
+.gtea:
+    add al, 'a'-0x0a
+    jmp .add_to_string
+
+.add_to_string:
+    stosb
+    shl dx, 4                   ; handle 4 next most significant bits
+
+    loop .loop
+
+.end:
+    push .hex_string
+    call print_string
+    add sp, 2                   ; 'pop' hex string address
+
+    pop di
+    pop bp
+
+    ret
+
+.hex_string: db "0x0000", 0
+.test_string: db "testest", 0
+
+
+;;;
+;;; print_registers - print contents of all registers
+;;; no arguments
+;;;
 
 print_registers:
     pushf                       ; store flags before modification
     push bp
     mov bp, sp
 
-    ; store register values not conserved by functions
+    ; store register values not preserved by functions
     push dx                     ; dx in now in [bp-2]
     push cx                     ; cx in now in [bp-4]
     push ax                     ; ax in now in [bp-6]
@@ -176,3 +251,5 @@ print_registers:
     pop bp
 
     ret
+
+

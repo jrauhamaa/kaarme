@@ -1,9 +1,0 @@
-PART2_SEGMENT:      equ 0x1000
-PART2_START_SECTOR: equ 2
-N_SECTORS_PART2:    equ 2
-VGA_SEGMENT:        equ 0xa000
-WIDTH_PIXELS:       equ 320
-HEIGHT_PIXELS:      equ 200
-COLOR_WHITE:        equ 0x0f
-BORDER_COLOR:       equ COLOR_WHITE
-
