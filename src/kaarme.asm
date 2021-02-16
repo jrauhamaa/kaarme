@@ -1,6 +1,7 @@
 %define SNAKE_BUFFER_LENGTH
 
 struc GameState
+    .state: resw 1
     .iteration: resw 1
     .snake_tail:  resw 1        ; offset from snake_buffer beginning
     .snake_head:    resw 1      ; offset from snake_buffer beginning
@@ -18,10 +19,14 @@ main:
     push 0x1c
     call register_interrupt_handler
 
-
-.end:
+    .end:
     hlt
     jmp .end
+
+
+;;;
+;;; initialize - set buffers & graphics to initial state
+;;;
 
 initialize:
     call init_snake_buffer
@@ -29,8 +34,16 @@ initialize:
     call init_graphics
     ret
 
-game_iteration:
 
+;;;
+;;; game_iteration - advance game one iteration. run this routine periodically
+;;;
+
+game_iteration:
+    cmp word [cs:game_state + GameState.state], STATE_GAME_OVER
+    je .end
+
+    .game_running:
     dec word [cs:game_state + GameState.iteration]
     jnz .end
 
@@ -41,9 +54,20 @@ game_iteration:
     .end:
     iret
 
+
+;;;
+;;; to_game_over - move to game over state and draw game over screen
+;;;
+
+to_game_over:
+    mov word [cs:game_state + GameState.state], STATE_GAME_OVER
+    call empty_screen
+    call draw_game_over_message
+    ret
+
+
 ;;;
 ;;; next_square - get next square for snake
-;;; no arguments
 ;;; returns x and y coordinates (in ax and dx, respectively)
 ;;;
 
@@ -68,7 +92,6 @@ next_square:
 
 ;;;
 ;;; advance_head - advance snake head, update graphics & buffers
-;;; no arguments
 ;;;
 
 advance_head:
@@ -79,10 +102,16 @@ advance_head:
     mov si, ax                  ; save coordinates to preserved registers
     mov di, dx
 
+    push di
+    push si
+    call check_collisions
+    cmp ax, 1                   ; ax = 1 -> collision
+    je .game_over
+
     ; UPDATE GRAPHICS
     push SNAKE_COLOR
-    push dx
-    push ax
+    push di
+    push si
     call draw_square            ; draw snake head
 
     ; UPDATE GAME STATE
@@ -101,13 +130,17 @@ advance_head:
     imul bx, di                 ; move grid buffer offset to ax
     mov word [cs:grid_buffer + bx], 1
 
+    .end:
     mov sp, bp
     popa
     ret
 
+    .game_over:
+    call to_game_over
+    jmp .end
+
 ;;;
 ;;; advance_tail - advance snake tail, update graphics & buffers
-;;; no arguments
 ;;;
 
 advance_tail:
@@ -158,6 +191,46 @@ get_next_snake_buffer_index:
     pop bp
     ret
 
+
+;;;
+;;; check_collisions - check if snake collides this turn
+;;; arguments: x, y
+;;; sets ax as 1 if collisions
+;;;
+
+check_collisions:
+    push bp
+    mov bp, sp
+    push bx
+
+    xor ax, ax
+    mov cx, [cs:bp+4]              ; x
+    mov dx, [cs:bp+6]              ; y
+
+    cmp cx, 0                   ; collision with left border
+    jl .collide
+    cmp dx, 0                   ; collision with top border
+    jl .collide
+    cmp cx, N_SQUARES_X         ; collision with right border
+    ja .collide
+    cmp dx, N_SQUARES_Y         ; collision with bottom border
+    ja .collide
+
+    mov bx, 2
+    imul bx, cx
+    imul bx, dx                 ; grid buffer offset
+    cmp word [cs:grid_buffer + bx], 1   ; collision with snake
+    je .collide
+    jmp .end
+
+    .collide:
+    mov ax, 1
+
+    .end:
+    pop bx
+    pop bp
+    ret
+
 ;----------------
 ;--- IMPORTS ----
 ;----------------
@@ -169,8 +242,12 @@ get_next_snake_buffer_index:
 ;-------------
 ;--- DATA ----
 ;-------------
+game_over_msg: db "Game Over"
+game_over_msg_len: equ $-game_over_msg
+
 game_state:
 istruc GameState
+    at GameState.state,             dw STATE_RUNNING
     at GameState.iteration,         dw TURN_LENGTH
     at GameState.snake_tail,        dw 0
     at GameState.snake_head,        dw INITIAL_LENGTH - 1

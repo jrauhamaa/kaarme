@@ -27,5 +27,8 @@ INITIAL_DIR_X:      equ -1
 INITIAL_DIR_Y:      equ 0
 INITIAL_LENGTH:     equ 5
 
+; game config
 TURN_LENGTH:        equ 2
+STATE_RUNNING:      equ 1
+STATE_GAME_OVER:    equ 0
 

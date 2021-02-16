@@ -77,7 +77,6 @@ print_hex:
 
 ;;;
 ;;; print_registers - print contents of all registers
-;;; no arguments
 ;;;
 
 print_registers:

@@ -1,7 +1,7 @@
 ;;;
 ;;; empty_screen - fill screen with black
-;;; no arguments
 ;;;
+
 empty_screen:
     push es
     push di
@@ -20,7 +20,6 @@ empty_screen:
 
 ;;;
 ;;; draw_borders - draw borders of game area
-;;; No arguments
 ;;;
 
 draw_borders:
@@ -52,7 +51,6 @@ draw_borders:
 
 ;;;
 ;;; draw_snake_initial - draw snake in its initial location
-;;; no arguments
 ;;;
 
 draw_snake_initial:
@@ -124,3 +122,19 @@ draw_square:
     ret
 
 
+draw_game_over_message:
+    pusha
+
+    mov ax, cs
+    mov es, ax                  ; message segment
+    xor ax, ax
+    mov bp, game_over_msg       ; message address
+    mov cx, game_over_msg_len   ; message length
+    mov ah, 0x13                ; write string interrupt
+    mov bx, 0x0064
+    mov dl, 10                  ; column
+    mov dh, 10                  ; column
+    int 10h
+
+    popa
+    ret

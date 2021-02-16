@@ -1,7 +1,7 @@
 ;;;
 ;;; init_snake_buffer - fill snake buffer with initial values
-;;; no arguments
 ;;;
+
 init_snake_buffer:
     pusha
 
@@ -25,8 +25,8 @@ init_snake_buffer:
 
 ;;;
 ;;; init_grid_buffer - fill grid buffer with initial snake location
-;;; no arguments
 ;;;
+
 init_grid_buffer:
     pusha
 
