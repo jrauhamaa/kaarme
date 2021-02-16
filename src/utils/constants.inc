@@ -20,6 +20,10 @@ COLOR_WHITE:        equ 0x0f
 BORDER_COLOR:       equ COLOR_WHITE
 SNAKE_COLOR:        equ COLOR_WHITE
 
+; keycodes
+KEYCODE_LEFT:       equ 0x4b
+KEYCODE_RIGHT:      equ 0x4d
+
 ; initial values
 INITIAL_X:          equ 25
 INITIAL_Y:          equ 10
@@ -31,4 +35,5 @@ INITIAL_LENGTH:     equ 5
 TURN_LENGTH:        equ 2
 STATE_RUNNING:      equ 1
 STATE_GAME_OVER:    equ 0
-
+LEFT_TURN:          equ -1
+RIGHT_TURN:         equ 1

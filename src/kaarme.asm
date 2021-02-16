@@ -1,27 +1,52 @@
 %define SNAKE_BUFFER_LENGTH
 
 struc GameState
-    .state: resw 1
-    .iteration: resw 1
-    .snake_tail:  resw 1        ; offset from snake_buffer beginning
-    .snake_head:    resw 1      ; offset from snake_buffer beginning
+    .state:           resw 1
+    .iteration:       resw 1
+    .snake_tail:      resw 1    ; offset from snake_buffer beginning
+    .snake_head:      resw 1    ; offset from snake_buffer beginning
     .snake_direction: resw 2    ; x & y
-    .score:         resw 1
-    .food_location  resw 2      ; x & y
+    .score:           resw 1
+    .food_location:   resw 2    ; x & y
+    .turn_direction:  resw 1    ; direction in which to turn
 endstruc
 
-main:
+;------------------
+;--- MAIN LOOP ----
+;------------------
+entry:
     call to_vga_mode
     call initialize
 
     push game_iteration
     push cs
     push 0x1c
-    call register_interrupt_handler
+    call register_interrupt_handler ; run game_iteration on each timer tick
 
-    .end:
+main_loop:
     hlt
-    jmp .end
+
+    call get_keystroke
+    cmp ah, KEYCODE_LEFT
+    je .left
+    cmp ah, KEYCODE_RIGHT
+    je .right
+    ;cmp al, 'n'
+    ;je .new_game
+
+    jmp main_loop
+
+    .left:
+    mov word [game_state + GameState.turn_direction], LEFT_TURN
+    jmp main_loop
+
+    .right:
+    mov word [game_state + GameState.turn_direction], RIGHT_TURN
+    jmp main_loop
+
+    .new_game:
+    call initialize
+    jmp main_loop
 
 
 ;;;
@@ -29,6 +54,7 @@ main:
 ;;;
 
 initialize:
+    ;call init_game_state
     call init_snake_buffer
     call init_grid_buffer
     call init_graphics
@@ -43,11 +69,11 @@ game_iteration:
     cmp word [cs:game_state + GameState.state], STATE_GAME_OVER
     je .end
 
-    .game_running:
     dec word [cs:game_state + GameState.iteration]
     jnz .end
-
     add word [cs:game_state + GameState.iteration], TURN_LENGTH
+
+    call turn_snake
     call advance_head
     call advance_tail
 
@@ -64,6 +90,43 @@ to_game_over:
     call empty_screen
     call draw_game_over_message
     ret
+
+
+;;;
+;;; turn_snake - update snake's direction
+;;;
+
+turn_snake:
+    mov ax, word [cs:game_state + GameState.turn_direction]
+
+    cmp ax, 0                   ; continue same dir
+    je .end
+
+    cmp ax, LEFT_TURN
+    je .turn_left
+
+    cmp ax, RIGHT_TURN
+    je .turn_right
+
+    .end:
+    mov word [cs:game_state + GameState.turn_direction], 0
+    ret
+
+    .turn_left:                 ; dx = dy && dy = -dx
+    mov cx, word [cs:game_state + GameState.snake_direction + 2]
+    imul dx, word [cs:game_state + GameState.snake_direction], -1
+    mov word [cs:game_state + GameState.snake_direction], cx
+    mov word [cs:game_state + GameState.snake_direction + 2], dx
+
+    jmp .end
+
+    .turn_right:                ; dx = -dy && dy = dx
+    imul cx, word [cs:game_state + GameState.snake_direction + 2], -1
+    mov dx, word [cs:game_state + GameState.snake_direction]
+    mov word [cs:game_state + GameState.snake_direction], cx
+    mov word [cs:game_state + GameState.snake_direction + 2], dx
+
+    jmp .end
 
 
 ;;;
@@ -238,6 +301,7 @@ check_collisions:
 %include "utils/draw.inc"
 %include "utils/initialize.inc"
 %include "utils/interrupts.inc"
+%include "utils/switch_video_mode.inc"
 
 ;-------------
 ;--- DATA ----
@@ -254,6 +318,7 @@ istruc GameState
     at GameState.snake_direction,   dw INITIAL_DIR_X, INITIAL_DIR_Y
     at GameState.score,             dw 0
     at GameState.food_location,     dw 0, 0
+    at GameState.turn_direction,    dw 0
 iend
 
 

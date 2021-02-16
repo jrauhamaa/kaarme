@@ -56,8 +56,27 @@ init_grid_buffer:
 ;;;
 ;;; init_graphics - draw snake in its initial location
 ;;;
+
 init_graphics:
     call empty_screen
     call draw_borders
     call draw_snake_initial
+    ret
+
+
+;;;
+;;; init_game_state - fill game_state-struct with initial values
+;;;
+
+init_game_state:
+    mov word [cs:game_state + GameState.state], STATE_RUNNING
+    mov word [cs:game_state + GameState.iteration], 1
+    mov word [cs:game_state + GameState.snake_tail], INITIAL_LENGTH
+    mov word [cs:game_state + GameState.snake_head], 0
+    mov word [cs:game_state + GameState.snake_direction], INITIAL_DIR_X
+    mov word [cs:game_state + GameState.snake_direction + 2], INITIAL_DIR_Y
+    mov word [cs:game_state + GameState.score], 0
+    mov word [cs:game_state + GameState.food_location], 0
+    mov word [cs:game_state + GameState.food_location + 2], 0
+    mov word [cs:game_state + GameState.turn_direction], 0
     ret
