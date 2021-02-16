@@ -23,6 +23,7 @@ init_snake_buffer:
     popa
     ret
 
+
 ;;;
 ;;; init_grid_buffer - fill grid buffer with initial snake location
 ;;;
@@ -53,6 +54,7 @@ init_grid_buffer:
     popa
     ret
 
+
 ;;;
 ;;; init_graphics - draw snake in its initial location
 ;;;
@@ -70,9 +72,9 @@ init_graphics:
 
 init_game_state:
     mov word [cs:game_state + GameState.state], STATE_RUNNING
-    mov word [cs:game_state + GameState.iteration], 1
-    mov word [cs:game_state + GameState.snake_tail], INITIAL_LENGTH
-    mov word [cs:game_state + GameState.snake_head], 0
+    mov word [cs:game_state + GameState.iteration], TURN_LENGTH
+    mov word [cs:game_state + GameState.snake_tail], 0
+    mov word [cs:game_state + GameState.snake_head], INITIAL_LENGTH-1
     mov word [cs:game_state + GameState.snake_direction], INITIAL_DIR_X
     mov word [cs:game_state + GameState.snake_direction + 2], INITIAL_DIR_Y
     mov word [cs:game_state + GameState.score], 0

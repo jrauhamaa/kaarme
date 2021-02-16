@@ -31,8 +31,8 @@ main_loop:
     je .left
     cmp ah, KEYCODE_RIGHT
     je .right
-    ;cmp al, 'n'
-    ;je .new_game
+    cmp al, 'n'
+    je .new_game
 
     jmp main_loop
 
@@ -54,7 +54,7 @@ main_loop:
 ;;;
 
 initialize:
-    ;call init_game_state
+    call init_game_state
     call init_snake_buffer
     call init_grid_buffer
     call init_graphics
@@ -153,6 +153,7 @@ next_square:
     pop bx
     ret
 
+
 ;;;
 ;;; advance_head - advance snake head, update graphics & buffers
 ;;;
@@ -202,6 +203,7 @@ advance_head:
     call to_game_over
     jmp .end
 
+
 ;;;
 ;;; advance_tail - advance snake tail, update graphics & buffers
 ;;;
@@ -233,6 +235,7 @@ advance_tail:
     mov sp, bp
     popa
     ret
+
 
 ;;;
 ;;; next_snake_buffer_index - return next index in snake buffer
