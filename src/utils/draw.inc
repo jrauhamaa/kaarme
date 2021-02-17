@@ -100,39 +100,59 @@ draw_snake_initial:
 draw_square:
     push bp
     mov bp, sp
-    push es
+
+    mov ax, SQUARE_WIDTH
+    imul ax, [bp+4]
+    mov dx, SQUARE_HEIGHT
+    imul dx, [bp+6]
+
+    push word [bp+8]            ; color
+    push word SQUARE_HEIGHT
+    push word SQUARE_WIDTH
+    push dx                     ; y
+    push ax                     ; x
+    call draw_rect
+
+    mov sp, bp
+    pop bp
+    ret
+
+
+;;;
+;;; draw_rect - draw a rectangle
+;;; arguments - x, y, width, height, color
+;;;
+
+draw_rect:
+    push bp
+    mov bp, sp
+    push bx
     push di
 
     mov ax, VGA_SEGMENT
     mov es, ax
+    mov di, WIDTH_PIXELS
+    imul di, word [bp+6]
+    add di, [bp+4]              ; memory offset -> di
+    mov bx, di                  ; keep di copy in bx
+    mov ax, word [bp+12]        ; color
 
-    mov cx, [bp+4]              ; x
-    mov dx, [bp+6]              ; y
-    mov ax, [bp+8]              ; al = pixel color
-
-    imul dx, dx, WIDTH_PIXELS*SQUARE_HEIGHT
-    imul cx, cx, SQUARE_WIDTH
-    add dx, cx
-    mov di, dx                  ; address of first pixel of square
-                                ; (WIDTH_PIXELS*SQUARE_HEIGHT*y+SQUARE_WIDTH*x)
-
-    mov cx, SQUARE_HEIGHT
+    mov cx, word [bp+10]        ; height
     .draw_row:
     push cx
-
-    mov cx, SQUARE_WIDTH
+    mov cx, word [bp+8]         ; width
     rep stosb
-
     pop cx
-    add di, WIDTH_PIXELS-SQUARE_WIDTH
+
+    add bx, WIDTH_PIXELS
+    mov di, bx
 
     loop .draw_row
 
     pop di
-    pop es
+    pop bx
     pop bp
     ret
-
 
 ;;;
 ;;; draw_game_over_message - draw game over text in the middle of the screen
