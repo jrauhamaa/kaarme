@@ -8,6 +8,7 @@ struc GameState
     .snake_direction: resw 2    ; x & y
     .score:           resw 1
     .food_location:   resw 2    ; x & y
+    .eating:          resw 1    ; 1 if eating this turn
     .turn_direction:  resw 1    ; direction in which to turn
 endstruc
 
@@ -37,11 +38,11 @@ main_loop:
     jmp main_loop
 
     .left:
-    mov word [game_state + GameState.turn_direction], LEFT_TURN
+    mov word [cs:game_state + GameState.turn_direction], LEFT_TURN
     jmp main_loop
 
     .right:
-    mov word [game_state + GameState.turn_direction], RIGHT_TURN
+    mov word [cs:game_state + GameState.turn_direction], RIGHT_TURN
     jmp main_loop
 
     .new_game:
@@ -76,6 +77,7 @@ game_iteration:
     call turn_snake
     call advance_head
     call advance_tail
+    call draw_score
 
     .end:
     iret
@@ -194,6 +196,13 @@ advance_head:
     imul bx, di                 ; move grid buffer offset to ax
     mov word [cs:grid_buffer + bx], 1
 
+    ; CHECK FOR FOOD
+    cmp si, word [cs:game_state + GameState.food_location]
+    jne .end
+    cmp di, word [cs:game_state + GameState.food_location + 2]
+    jne .end
+    call eat_food
+
     .end:
     mov sp, bp
     popa
@@ -211,6 +220,9 @@ advance_head:
 advance_tail:
     pusha
     mov bp, sp
+
+    cmp word [cs:game_state + GameState.eating], 1
+    je .eating                  ; don't advance tail if eating
 
     ; UPDATE GRAPHICS
     imul bx, word [cs:game_state + GameState.snake_tail], 4 ; snake buffer offset
@@ -232,9 +244,14 @@ advance_tail:
     call get_next_snake_buffer_index    ; move next snake tail index to ax
     mov word [cs:game_state + GameState.snake_tail], ax
 
+    .end:
     mov sp, bp
     popa
     ret
+
+    .eating:
+    mov word [cs:game_state + GameState.eating], 0
+    jmp .end
 
 
 ;;;
@@ -297,6 +314,88 @@ check_collisions:
     pop bp
     ret
 
+
+eat_food:
+    mov word [cs:game_state + GameState.eating], 1
+    inc word [cs:game_state + GameState.score]
+    call new_food
+    ret
+
+;;;
+;;; new_food - create new food after eating
+;;; TODO: calculate remainders properly
+;;;
+
+new_food:
+    pusha
+    mov bp, sp
+
+    ; generate new coordinates for food
+    .new_location:
+    call pseudorandom
+    ;mov cx, N_SQUARES_X
+    ;div cx
+    ;mov si, dx                  ; x
+    mov si, ax
+    .normalize_x:
+    cmp si, N_SQUARES_X
+    jb .cont_x
+    sub si, N_SQUARES_X
+    jmp .normalize_x
+    .cont_x:
+
+    call pseudorandom
+    ;mov cx, N_SQUARES_Y
+    ;div cx
+    ;mov di, dx                  ; y
+    mov di, ax
+    .normalize_y:
+    cmp di, N_SQUARES_Y
+    jb .cont_y
+    sub di, N_SQUARES_Y
+    jmp .normalize_y
+    .cont_y:
+
+    push di
+    push si
+    call check_collisions
+    cmp ax, 1
+    je .new_location            ; Try again if square already occupied
+
+    ; save coordinates
+    mov word [cs:game_state + GameState.food_location], si
+    mov word [cs:game_state + GameState.food_location + 2], di
+
+    ; draw food
+    push word FOOD_COLOR
+    push di
+    push si
+    call draw_square
+
+    mov sp, bp
+    popa
+    ret
+
+;;;
+;;; pseudorandom - generate a pseudorandom number.
+;;;                Copied from c default implementation.
+;;; the pseudorandom number is placed in ax
+;;;
+
+pseudorandom:
+    imul ax, word [cs:.previous], 15245
+    add ax, 12345
+    mov word [cs:.previous], ax
+
+    xor dx, dx
+    mov cx, 32768
+    div cx
+
+    mov ax, dx                  ; remainder
+    ret
+
+    .previous: dw 1
+
 ;----------------
 ;--- IMPORTS ----
 ;----------------
@@ -321,6 +420,7 @@ istruc GameState
     at GameState.snake_direction,   dw INITIAL_DIR_X, INITIAL_DIR_Y
     at GameState.score,             dw 0
     at GameState.food_location,     dw 0, 0
+    at GameState.eating,            dw 0
     at GameState.turn_direction,    dw 0
 iend
 

@@ -63,6 +63,7 @@ init_graphics:
     call empty_screen
     call draw_borders
     call draw_snake_initial
+    call new_food
     ret
 
 
@@ -80,5 +81,6 @@ init_game_state:
     mov word [cs:game_state + GameState.score], 0
     mov word [cs:game_state + GameState.food_location], 0
     mov word [cs:game_state + GameState.food_location + 2], 0
+    mov word [cs:game_state + GameState.eating], 0
     mov word [cs:game_state + GameState.turn_direction], 0
     ret

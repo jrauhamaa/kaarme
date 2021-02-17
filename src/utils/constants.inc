@@ -14,11 +14,14 @@ SQUARE_HEIGHT:      equ 10
 N_SQUARES_X:        equ WIDTH_PIXELS / SQUARE_WIDTH
 N_SQUARES_Y:        equ HEIGHT_PIXELS / SQUARE_HEIGHT
 N_SQUARES:          equ N_SQUARES_X*N_SQUARES_Y
+MARGIN_TOP:         equ 1
 
 ; colors
 COLOR_WHITE:        equ 0x0f
+COLOR_RED:          equ 0x04
 BORDER_COLOR:       equ COLOR_WHITE
 SNAKE_COLOR:        equ COLOR_WHITE
+FOOD_COLOR:         equ COLOR_RED
 
 ; keycodes
 KEYCODE_LEFT:       equ 0x4b
