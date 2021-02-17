@@ -74,10 +74,16 @@ draw_snake_initial:
     xor bx, bx
 
     .init_square:
-    push SNAKE_COLOR
+    push word SNAKE_COLOR
     push di
     push si
     call draw_square
+
+    push word INITIAL_DIR_Y
+    push word INITIAL_DIR_X
+    push di
+    push si
+    call connect_squares
 
     inc bx
     add si, INITIAL_DIR_X
@@ -86,10 +92,117 @@ draw_snake_initial:
     cmp bx, INITIAL_LENGTH
     jb .init_square
 
+    ; erase tail expanding to previous square
+    push word INITIAL_Y - INITIAL_DIR_Y
+    push word INITIAL_X - INITIAL_DIR_X
+    call empty_square
+
     mov sp, bp
 
     popa
     ret
+
+
+;;;
+;;; empty_square - fill square with black without erasing borders
+;;; arguments: x, y
+;;;
+
+empty_square:
+    push bp
+    mov bp, sp
+    push si
+    push di
+
+    mov ax, SQUARE_WIDTH
+    imul ax, word [bp+4]
+    mov dx, SQUARE_HEIGHT
+    imul dx, word [bp+6]
+    mov si, SQUARE_WIDTH
+    mov di, SQUARE_HEIGHT
+
+    cmp word [bp+4], 0
+    jne .cont1
+    mov ax, 2
+    sub si, 2
+    .cont1:
+
+    cmp word [bp+6], 0
+    jne .cont2
+    mov dx, 2
+    sub di, 2
+    .cont2:
+
+    cmp word [bp+4], N_SQUARES_X - 1
+    jne .cont3
+    sub si, 2
+    .cont3:
+
+    cmp word [bp+6], N_SQUARES_Y - 1
+    jne .cont4
+    sub di, 2
+    .cont4:
+
+    mov bp, sp
+    push word 0                 ; fill with zeroes
+    push di                     ; height
+    push si                     ; width
+    push dx                     ; y
+    push ax                     ; x
+    call draw_rect
+
+    mov sp, bp
+    pop di
+    pop si
+    pop bp
+    ret
+
+
+;;;
+;;; connect_squares - fill padding between squares
+;;; arguments: x, y, dx, dy
+;;;
+
+connect_squares:
+    push bp
+    mov bp, sp
+
+    mov ax, SQUARE_WIDTH
+    imul ax, word [bp+4]
+    add ax, SQUARE_PADDING
+    mov dx, SQUARE_HEIGHT
+    imul dx, word [bp+6]
+    add dx, SQUARE_PADDING
+
+    cmp word [bp+8], 0
+    jne .horizontal
+    jmp .vertical
+
+    .end:
+    push SNAKE_COLOR
+    push SQUARE_HEIGHT - 2*SQUARE_PADDING
+    push SQUARE_WIDTH - 2*SQUARE_PADDING
+    push dx                     ; y
+    push ax                     ; x
+    call draw_rect
+
+    mov sp, bp
+    pop bp
+    ret
+
+    .horizontal:
+    mov cx, SQUARE_WIDTH/2
+    imul cx, word [bp+8]
+    sub ax, cx
+
+    jmp .end
+
+    .vertical:
+    mov cx, SQUARE_HEIGHT/2
+    imul cx, word [bp+10]
+    sub dx, cx
+
+    jmp .end
 
 
 ;;;
@@ -103,12 +216,14 @@ draw_square:
 
     mov ax, SQUARE_WIDTH
     imul ax, [bp+4]
+    add ax, SQUARE_PADDING
     mov dx, SQUARE_HEIGHT
     imul dx, [bp+6]
+    add dx, SQUARE_PADDING
 
     push word [bp+8]            ; color
-    push word SQUARE_HEIGHT
-    push word SQUARE_WIDTH
+    push word SQUARE_HEIGHT-2*SQUARE_PADDING
+    push word SQUARE_WIDTH-2*SQUARE_PADDING
     push dx                     ; y
     push ax                     ; x
     call draw_rect

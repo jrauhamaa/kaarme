@@ -179,6 +179,11 @@ advance_head:
     push di
     push si
     call draw_square            ; draw snake head
+    push word [cs:game_state + GameState.snake_direction + 2]   ; dy
+    push word [cs:game_state + GameState.snake_direction]   ; dx
+    push di
+    push si
+    call connect_squares
 
     ; UPDATE GAME STATE
     push word [cs:game_state + GameState.snake_head]
@@ -228,10 +233,9 @@ advance_tail:
     imul bx, word [cs:game_state + GameState.snake_tail], 4 ; snake buffer offset
     mov si, word [cs:snake_buffer + bx]    ; old x coordinate
     mov di, word [cs:snake_buffer + bx + 2]    ; old y coordinate
-    push word 0                 ; empty square color
     push di
     push si
-    call draw_square
+    call empty_square
 
     ; UPDATE GRID BUFFER
     mov bx, 2

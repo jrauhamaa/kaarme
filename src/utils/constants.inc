@@ -4,13 +4,14 @@ VGA_SEGMENT:        equ 0xa000
 
 ; bootloader part 2 sectors
 PART2_START_SECTOR: equ 2
-N_SECTORS_PART2:    equ 10
+N_SECTORS_PART2:    equ 11
 
 ; vga dimensions
 WIDTH_PIXELS:       equ 320
 HEIGHT_PIXELS:      equ 200
 SQUARE_WIDTH:       equ 10
 SQUARE_HEIGHT:      equ 10
+SQUARE_PADDING:     equ 2
 N_SQUARES_X:        equ WIDTH_PIXELS / SQUARE_WIDTH
 N_SQUARES_Y:        equ HEIGHT_PIXELS / SQUARE_HEIGHT
 N_SQUARES:          equ N_SQUARES_X*N_SQUARES_Y
