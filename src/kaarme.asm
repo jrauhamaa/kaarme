@@ -57,7 +57,6 @@ main_loop:
 initialize:
     call init_game_state
     call init_snake_buffer
-    ;call init_grid_buffer
     call init_graphics
     ret
 
@@ -195,12 +194,6 @@ advance_head:
     mov word [cs:snake_buffer + bx], si
     mov word [cs:snake_buffer + bx + 2], di
 
-    ; UPDATE GRID BUFFER
-    ;mov bx, 2
-    ;imul bx, si
-    ;imul bx, di                 ; move grid buffer offset to ax
-    ;mov word [cs:grid_buffer + bx], 1
-
     ; CHECK FOR FOOD
     cmp si, word [cs:game_state + GameState.food_location]
     jne .end
@@ -236,12 +229,6 @@ advance_tail:
     push di
     push si
     call empty_square
-
-    ; UPDATE GRID BUFFER
-    ;mov bx, 2
-    ;imul bx, si
-    ;imul bx, di                 ; grid buffer offset -> bx
-    ;mov word [cs:grid_buffer + bx], 0
 
     ; UPDATE GAME STATE
     push word [cs:game_state + GameState.snake_tail]
@@ -357,36 +344,46 @@ new_food:
     mov bp, sp
 
     ; generate new coordinates for food
-    .new_location:
+    .random_x:
     call pseudorandom
-    ;mov cx, N_SQUARES_X
-    ;div cx
-    ;mov si, dx                  ; x
-    mov si, ax
-    .normalize_x:
-    cmp si, N_SQUARES_X
-    jb .cont_x
-    sub si, N_SQUARES_X
-    jmp .normalize_x
-    .cont_x:
+    cmp ax, 0
+    je .random_y
+    xor dx, dx
+    mov cx, N_SQUARES_X
+    mov si, dx
 
+    .random_y:
     call pseudorandom
-    ;mov cx, N_SQUARES_Y
-    ;div cx
-    ;mov di, dx                  ; y
-    mov di, ax
-    .normalize_y:
-    cmp di, N_SQUARES_Y
-    jb .cont_y
-    sub di, N_SQUARES_Y
-    jmp .normalize_y
-    .cont_y:
+    cmp ax, 0
+    je .collisions
+    xor dx, dx
+    mov cx, N_SQUARES_Y
+    div cx
+    mov di, dx
 
+    ; if square occupied by snake, iterate through squares
+    ; until empty one is found
+    .collisions
     push di
     push si
     call check_collisions
     cmp ax, 1
-    je .new_location            ; Try again if square already occupied
+    jne .end                    ; square not occupied by snake
+
+    inc si                      ; x++
+    cmp si, N_SQUARES_X
+    jb .collisions
+
+    xor si, si                  ; continue iterating from x=0 && y++
+    inc di
+
+    cmp di, N_SQUARES_Y
+    jb .collisions
+
+    xor di, di                  ; continue iterating from y=0
+    jmp .collisions
+
+    .end
 
     ; save coordinates
     mov word [cs:game_state + GameState.food_location], si
@@ -453,6 +450,5 @@ iend
 
 
 snake_buffer:  times 2*N_SQUARES dw 0
-;grid_buffer:   times N_SQUARES dw 0
 
     times N_SECTORS_PART2*512-($-$$) db 0       ; pad sector with zeroes
