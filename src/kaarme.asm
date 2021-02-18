@@ -291,7 +291,7 @@ check_collisions:
     cmp cx, N_SQUARES_X         ; collision with right border
     ja .collide
     cmp dx, N_SQUARES_Y         ; collision with bottom border
-    ja .collide
+    jnb .collide
 
     ; check if snake collides with itself
     mov di, word [cs:game_state + GameState.snake_tail]
