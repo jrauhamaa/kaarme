@@ -283,7 +283,7 @@ draw_game_over_message:
     mov cx, game_over_msg_len   ; message length
     mov ah, 0x13                ; write string interrupt
     mov bx, 0x0064
-    mov dl, 10                  ; column
+    mov dl, 15                  ; column
     mov dh, 10                  ; row
     int 0x10
 

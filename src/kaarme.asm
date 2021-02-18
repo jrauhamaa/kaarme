@@ -296,7 +296,7 @@ check_collisions:
     ; check if snake collides with itself
     mov di, word [cs:game_state + GameState.snake_tail]
 
-    .loop
+    .loop:
     imul bx, di, 4
 
     .check_x:
@@ -363,7 +363,7 @@ new_food:
 
     ; if square occupied by snake, iterate through squares
     ; until empty one is found
-    .collisions
+    .collisions:
     push di
     push si
     call check_collisions
@@ -383,7 +383,7 @@ new_food:
     xor di, di                  ; continue iterating from y=0
     jmp .collisions
 
-    .end
+    .end:
 
     ; save coordinates
     mov word [cs:game_state + GameState.food_location], si
