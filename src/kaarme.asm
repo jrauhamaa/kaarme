@@ -449,6 +449,6 @@ istruc GameState
 iend
 
 
-snake_buffer:  times 2*N_SQUARES dw 0
+snake_buffer:                   ; use memory area after code as snake buffer
 
     times N_SECTORS_PART2*512-($-$$) db 0       ; pad sector with zeroes
