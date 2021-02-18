@@ -9,34 +9,25 @@ N_SECTORS_PART2:    equ 11
 ; vga dimensions
 WIDTH_PIXELS:       equ 320
 HEIGHT_PIXELS:      equ 200
-SQUARE_WIDTH:       equ 10
-SQUARE_HEIGHT:      equ 10
-SQUARE_PADDING:     equ 2
 N_SQUARES_X:        equ WIDTH_PIXELS / SQUARE_WIDTH
 N_SQUARES_Y:        equ HEIGHT_PIXELS / SQUARE_HEIGHT
 N_SQUARES:          equ N_SQUARES_X*N_SQUARES_Y
-MARGIN_TOP:         equ 1
 
 ; colors
 COLOR_WHITE:        equ 0x0f
 COLOR_RED:          equ 0x04
-BORDER_COLOR:       equ COLOR_WHITE
-SNAKE_COLOR:        equ COLOR_WHITE
-FOOD_COLOR:         equ COLOR_RED
 
 ; keycodes
 KEYCODE_LEFT:       equ 0x4b
 KEYCODE_RIGHT:      equ 0x4d
 
 ; initial values
-INITIAL_X:          equ 25
-INITIAL_Y:          equ 10
+INITIAL_X:          equ N_SQUARES_X-2
+INITIAL_Y:          equ N_SQUARES_Y/2
 INITIAL_DIR_X:      equ -1
 INITIAL_DIR_Y:      equ 0
-INITIAL_LENGTH:     equ 5
 
 ; game config
-TURN_LENGTH:        equ 2
 STATE_RUNNING:      equ 1
 STATE_GAME_OVER:    equ 0
 LEFT_TURN:          equ -1

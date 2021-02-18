@@ -1,0 +1,13 @@
+; vga dimensions
+SQUARE_WIDTH:       equ 40      ; width of one game square in pixels
+SQUARE_HEIGHT:      equ 40      ; height of one game square in pixels
+SQUARE_PADDING:     equ 2       ; width of padding in pixels
+MARGIN_TOP:         equ 1       ; space for score text
+
+BORDER_COLOR:       equ COLOR_WHITE ; color of game area border
+SNAKE_COLOR:        equ COLOR_WHITE ; color of snake
+FOOD_COLOR:         equ COLOR_RED   ; color of snake food
+
+INITIAL_LENGTH:     equ 3       ; initial length of the snake
+
+TURN_LENGTH:        equ 8       ; how fast snake moves forward (unit: 1/18 s)

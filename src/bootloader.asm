@@ -43,6 +43,7 @@ main:
 .error_message: db "Error loading disk", 0
 .drive_number: db 0
 
+%include "config"
 %include "utils/switch_video_mode.inc"
 %include "utils/constants.inc"
 %include "utils/print.inc"

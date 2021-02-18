@@ -2,7 +2,7 @@
 
 default: all.bin
 
-%.asm: utils/*.inc
+%.asm: utils/*.inc config
 	touch $@
 
 %.bin: %.asm

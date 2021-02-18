@@ -123,26 +123,26 @@ empty_square:
 
     cmp word [bp+4], 0
     jne .cont1
-    mov ax, 2
+    add ax, 2
     sub si, 2
+
     .cont1:
-
-    cmp word [bp+6], 0
+    cmp word [bp+6], MARGIN_TOP
     jne .cont2
-    mov dx, 2
+    add dx, 2
     sub di, 2
-    .cont2:
 
+    .cont2:
     cmp word [bp+4], N_SQUARES_X - 1
     jne .cont3
     sub si, 2
-    .cont3:
 
+    .cont3:
     cmp word [bp+6], N_SQUARES_Y - 1
     jne .cont4
     sub di, 2
-    .cont4:
 
+    .cont4:
     mov bp, sp
     push word 0                 ; fill with zeroes
     push di                     ; height
@@ -312,7 +312,8 @@ draw_score:
     cmp ax, 0                   ; division of zero results in error
     je .draw
 
-    div bx                      ; quotient - ax, remainder - dx
+    xor dx, dx
+    idiv bx                      ; quotient - ax, remainder - dx
     add dx, '0'
     mov [cs:di], dl
     dec di

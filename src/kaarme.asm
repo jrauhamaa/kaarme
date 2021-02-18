@@ -57,7 +57,7 @@ main_loop:
 initialize:
     call init_game_state
     call init_snake_buffer
-    call init_grid_buffer
+    ;call init_grid_buffer
     call init_graphics
     ret
 
@@ -196,10 +196,10 @@ advance_head:
     mov word [cs:snake_buffer + bx + 2], di
 
     ; UPDATE GRID BUFFER
-    mov bx, 2
-    imul bx, si
-    imul bx, di                 ; move grid buffer offset to ax
-    mov word [cs:grid_buffer + bx], 1
+    ;mov bx, 2
+    ;imul bx, si
+    ;imul bx, di                 ; move grid buffer offset to ax
+    ;mov word [cs:grid_buffer + bx], 1
 
     ; CHECK FOR FOOD
     cmp si, word [cs:game_state + GameState.food_location]
@@ -238,10 +238,10 @@ advance_tail:
     call empty_square
 
     ; UPDATE GRID BUFFER
-    mov bx, 2
-    imul bx, si
-    imul bx, di                 ; grid buffer offset -> bx
-    mov word [cs:grid_buffer + bx], 0
+    ;mov bx, 2
+    ;imul bx, si
+    ;imul bx, di                 ; grid buffer offset -> bx
+    ;mov word [cs:grid_buffer + bx], 0
 
     ; UPDATE GAME STATE
     push word [cs:game_state + GameState.snake_tail]
@@ -289,31 +289,53 @@ check_collisions:
     push bp
     mov bp, sp
     push bx
+    push di
 
     xor ax, ax
     mov cx, [cs:bp+4]              ; x
     mov dx, [cs:bp+6]              ; y
+    mov bp, sp
 
+    ; check borders
     cmp cx, 0                   ; collision with left border
     jl .collide
-    cmp dx, 0                   ; collision with top border
+    cmp dx, MARGIN_TOP          ; collision with top border
     jl .collide
     cmp cx, N_SQUARES_X         ; collision with right border
     ja .collide
     cmp dx, N_SQUARES_Y         ; collision with bottom border
     ja .collide
 
-    mov bx, 2
-    imul bx, cx
-    imul bx, dx                 ; grid buffer offset
-    cmp word [cs:grid_buffer + bx], 1   ; collision with snake
+    ; check if snake collides with itself
+    mov di, word [cs:game_state + GameState.snake_tail]
+
+    .loop
+    imul bx, di, 4
+
+    .check_x:
+    cmp cx, word [cs:snake_buffer + bx]
+    je .check_y
+    jmp .loop_end
+
+    .check_y:
+    cmp dx, word [cs:snake_buffer + bx + 2]
     je .collide
-    jmp .end
+
+    .loop_end:
+    cmp di, word [cs:game_state + GameState.snake_head]
+    je .end
+    push di
+    call get_next_snake_buffer_index
+    mov di, ax
+    xor ax, ax
+    jmp .loop
 
     .collide:
     mov ax, 1
 
     .end:
+    mov sp, bp
+    pop di
     pop bx
     pop bp
     ret
@@ -403,6 +425,7 @@ pseudorandom:
 ;----------------
 ;--- IMPORTS ----
 ;----------------
+%include "config"
 %include "utils/constants.inc"
 %include "utils/draw.inc"
 %include "utils/initialize.inc"
@@ -430,6 +453,6 @@ iend
 
 
 snake_buffer:  times 2*N_SQUARES dw 0
-grid_buffer:   times N_SQUARES dw 0
+;grid_buffer:   times N_SQUARES dw 0
 
     times N_SECTORS_PART2*512-($-$$) db 0       ; pad sector with zeroes
