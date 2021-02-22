@@ -11,7 +11,7 @@ print_string:
 
     mov ah, 0x0e                ; print char interrupt
 
-.print_char:
+    .print_char:
     lodsb
     cmp al, 0                   ; if character is NULL, return
     je .end
@@ -19,7 +19,7 @@ print_string:
     int 0x10                    ; print character
     jmp .print_char
 
-.end:
+    .end:
     pop si
     pop bp
     ret
@@ -39,7 +39,7 @@ print_hex:
     mov di, .hex_string + 2
     mov cx, 4
 
-.loop:
+    .loop:
     mov al, dh
     shr al, 4                   ; isolate four most significant bits
 
@@ -47,21 +47,21 @@ print_hex:
     ja .gtea
     jmp .lte9
 
-.lte9:
+    .lte9:
     add al, '0'
     jmp .add_to_string
 
-.gtea:
+    .gtea:
     add al, 'a'-0x0a
     jmp .add_to_string
 
-.add_to_string:
+    .add_to_string:
     stosb
     shl dx, 4                   ; handle 4 next most significant bits
 
     loop .loop
 
-.end:
+    .end:
     push .hex_string
     call print_string
     add sp, 2                   ; 'pop' hex string address
@@ -71,8 +71,8 @@ print_hex:
 
     ret
 
-.hex_string: db "0x0000", 0
-.test_string: db "testest", 0
+    .hex_string: db "0x0000", 0
+    .test_string: db "testest", 0
 
 
 ;;;
@@ -216,39 +216,37 @@ print_registers:
     ret
 
 
-.message db "Registers:", 0
-.flags:  db 0x0a, 0x0d, "flags: ", 0
-.ax:     db 0x0a, 0x0d, "ax: ", 0
-.bx:     db 0x0a, 0x0d, "bx: ", 0
-.cx:     db 0x0a, 0x0d, "cx: ", 0
-.dx:     db 0x0a, 0x0d, "dx: ", 0
-.si:     db 0x0a, 0x0d, "si: ", 0
-.di:     db 0x0a, 0x0d, "di: ", 0
-.sp:     db 0x0a, 0x0d, "sp: ", 0
-.bp:     db 0x0a, 0x0d, "bp: ", 0
-.ss:     db 0x0a, 0x0d, "ss: ", 0
-.cs:     db 0x0a, 0x0d, "cs: ", 0
-.ds:     db 0x0a, 0x0d, "ds: ", 0
-.es:     db 0x0a, 0x0d, "es: ", 0
-.fs:     db 0x0a, 0x0d, "fs: ", 0
-.gs:     db 0x0a, 0x0d, "gs: ", 0
-.newline db 0x0a, 0x0d, 0
+    .message db "Registers:", 0
+    .flags:  db 0x0a, 0x0d, "flags: ", 0
+    .ax:     db 0x0a, 0x0d, "ax: ", 0
+    .bx:     db 0x0a, 0x0d, "bx: ", 0
+    .cx:     db 0x0a, 0x0d, "cx: ", 0
+    .dx:     db 0x0a, 0x0d, "dx: ", 0
+    .si:     db 0x0a, 0x0d, "si: ", 0
+    .di:     db 0x0a, 0x0d, "di: ", 0
+    .sp:     db 0x0a, 0x0d, "sp: ", 0
+    .bp:     db 0x0a, 0x0d, "bp: ", 0
+    .ss:     db 0x0a, 0x0d, "ss: ", 0
+    .cs:     db 0x0a, 0x0d, "cs: ", 0
+    .ds:     db 0x0a, 0x0d, "ds: ", 0
+    .es:     db 0x0a, 0x0d, "es: ", 0
+    .fs:     db 0x0a, 0x0d, "fs: ", 0
+    .gs:     db 0x0a, 0x0d, "gs: ", 0
+    .newline db 0x0a, 0x0d, 0
 
-.print_register:                ; args: register name, register content
-    push bp
-    mov bp, sp
+    .print_register:                ; args: register name, register content
+        push bp
+        mov bp, sp
 
-    mov ax, word [bp+4]         ; register name
-    push ax
-    call print_string
+        mov ax, word [bp+4]         ; register name
+        push ax
+        call print_string
 
-    mov ax, word [bp+6]         ; register contents
-    push ax
-    call print_hex
+        mov ax, word [bp+6]         ; register contents
+        push ax
+        call print_hex
 
-    mov sp, bp
-    pop bp
+        mov sp, bp
+        pop bp
 
-    ret
-
-
+        ret

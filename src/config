@@ -1,4 +1,3 @@
-; vga dimensions
 SQUARE_WIDTH:       equ 10      ; width of one game square in pixels
 SQUARE_HEIGHT:      equ 10      ; height of one game square in pixels
 SQUARE_PADDING:     equ 2       ; width of padding in pixels

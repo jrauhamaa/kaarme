@@ -1,5 +1,3 @@
-%define SNAKE_BUFFER_LENGTH
-
 struc GameState
     .state:           resw 1
     .iteration:       resw 1
@@ -336,7 +334,6 @@ eat_food:
 
 ;;;
 ;;; new_food - create new food after eating
-;;; TODO: calculate remainders properly
 ;;;
 
 new_food:
@@ -350,6 +347,7 @@ new_food:
     je .random_y
     xor dx, dx
     mov cx, N_SQUARES_X
+    div cx
     mov si, dx
 
     .random_y:
